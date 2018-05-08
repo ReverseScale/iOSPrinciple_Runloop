@@ -7,6 +7,10 @@
 //
 
 #import "ViewController.h"
+#import "RunloopTimerModeViewController.h"
+#import "RunlooploadImageModeViewController.h"
+#import "RunloopObserverViewController.h"
+#import "RunloopLongrunViewController.h"
 
 @interface ViewController ()
 
@@ -28,6 +32,7 @@
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     NSLog(@"点击了屏幕");
 }
+
 /// Source0 performSelector
 - (void)performSelector {
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
@@ -52,6 +57,22 @@
     NSLog(@"获得当前线程的RunLoop对象: \n%@", CFRunLoopGetCurrent());
     // 获得主线程的RunLoop对象
     NSLog(@"获得主线程的RunLoop对象: \n%@", CFRunLoopGetMain());
+}
+- (IBAction)timerAction:(id)sender {
+    RunloopTimerModeViewController *vc = [RunloopTimerModeViewController new];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+- (IBAction)loadImageAction:(id)sender {
+    RunlooploadImageModeViewController *vc = [RunlooploadImageModeViewController new];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+- (IBAction)observerAction:(id)sender {
+    RunloopObserverViewController *vc = [RunloopObserverViewController new];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+- (IBAction)longrunAction:(id)sender {
+    RunloopLongrunViewController *vc = [RunloopLongrunViewController new];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)didReceiveMemoryWarning {

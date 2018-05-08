@@ -15,6 +15,11 @@
 		34964BA120A17F5400642082 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 34964BA020A17F5400642082 /* main.m */; };
 		34964BAB20A17F5500642082 /* iOSPrinciple_RunloopTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34964BAA20A17F5500642082 /* iOSPrinciple_RunloopTests.m */; };
 		34964BB620A17F5500642082 /* iOSPrinciple_RunloopUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34964BB520A17F5500642082 /* iOSPrinciple_RunloopUITests.m */; };
+		34964BC520A1A2A000642082 /* RunloopTimerModeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34964BC420A1A2A000642082 /* RunloopTimerModeViewController.m */; };
+		34964BC820A1A3A200642082 /* RunlooploadImageModeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34964BC720A1A3A200642082 /* RunlooploadImageModeViewController.m */; };
+		34964BCB20A1A57B00642082 /* RunloopObserverViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34964BCA20A1A57B00642082 /* RunloopObserverViewController.m */; };
+		34964BD220A1A9B100642082 /* RunloopLongrunViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34964BD020A1A9B100642082 /* RunloopLongrunViewController.m */; };
+		34964BD320A1A9B100642082 /* RuntimeLongrunViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 34964BD120A1A9B100642082 /* RuntimeLongrunViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +56,15 @@
 		34964BB120A17F5500642082 /* iOSPrinciple_RunloopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSPrinciple_RunloopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34964BB520A17F5500642082 /* iOSPrinciple_RunloopUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = iOSPrinciple_RunloopUITests.m; sourceTree = "<group>"; };
 		34964BB720A17F5500642082 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		34964BC320A1A2A000642082 /* RunloopTimerModeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RunloopTimerModeViewController.h; sourceTree = "<group>"; };
+		34964BC420A1A2A000642082 /* RunloopTimerModeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RunloopTimerModeViewController.m; sourceTree = "<group>"; };
+		34964BC620A1A3A200642082 /* RunlooploadImageModeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RunlooploadImageModeViewController.h; sourceTree = "<group>"; };
+		34964BC720A1A3A200642082 /* RunlooploadImageModeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RunlooploadImageModeViewController.m; sourceTree = "<group>"; };
+		34964BC920A1A57B00642082 /* RunloopObserverViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RunloopObserverViewController.h; sourceTree = "<group>"; };
+		34964BCA20A1A57B00642082 /* RunloopObserverViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RunloopObserverViewController.m; sourceTree = "<group>"; };
+		34964BCF20A1A9B100642082 /* RunloopLongrunViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RunloopLongrunViewController.h; sourceTree = "<group>"; };
+		34964BD020A1A9B100642082 /* RunloopLongrunViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RunloopLongrunViewController.m; sourceTree = "<group>"; };
+		34964BD120A1A9B100642082 /* RuntimeLongrunViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RuntimeLongrunViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +119,15 @@
 				34964B9220A17F4C00642082 /* AppDelegate.m */,
 				34964B9420A17F4C00642082 /* ViewController.h */,
 				34964B9520A17F4C00642082 /* ViewController.m */,
+				34964BC320A1A2A000642082 /* RunloopTimerModeViewController.h */,
+				34964BC420A1A2A000642082 /* RunloopTimerModeViewController.m */,
+				34964BC620A1A3A200642082 /* RunlooploadImageModeViewController.h */,
+				34964BC720A1A3A200642082 /* RunlooploadImageModeViewController.m */,
+				34964BC920A1A57B00642082 /* RunloopObserverViewController.h */,
+				34964BCA20A1A57B00642082 /* RunloopObserverViewController.m */,
+				34964BCF20A1A9B100642082 /* RunloopLongrunViewController.h */,
+				34964BD020A1A9B100642082 /* RunloopLongrunViewController.m */,
+				34964BD120A1A9B100642082 /* RuntimeLongrunViewController.xib */,
 				34964B9720A17F4D00642082 /* Main.storyboard */,
 				34964B9A20A17F5400642082 /* Assets.xcassets */,
 				34964B9C20A17F5400642082 /* LaunchScreen.storyboard */,
@@ -237,6 +260,7 @@
 			files = (
 				34964B9E20A17F5400642082 /* LaunchScreen.storyboard in Resources */,
 				34964B9B20A17F5400642082 /* Assets.xcassets in Resources */,
+				34964BD320A1A9B100642082 /* RuntimeLongrunViewController.xib in Resources */,
 				34964B9920A17F4D00642082 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -263,8 +287,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				34964B9620A17F4C00642082 /* ViewController.m in Sources */,
+				34964BD220A1A9B100642082 /* RunloopLongrunViewController.m in Sources */,
+				34964BC520A1A2A000642082 /* RunloopTimerModeViewController.m in Sources */,
 				34964BA120A17F5400642082 /* main.m in Sources */,
 				34964B9320A17F4C00642082 /* AppDelegate.m in Sources */,
+				34964BCB20A1A57B00642082 /* RunloopObserverViewController.m in Sources */,
+				34964BC820A1A3A200642082 /* RunlooploadImageModeViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
