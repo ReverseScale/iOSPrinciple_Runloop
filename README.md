@@ -687,7 +687,7 @@ RunLoop内部有一个自动释放池，当RunLoop开启时，就会自动创建
 
 NSTimer、ImageView显示、PerformSelector等在上面已经有过例子，这里不再赘述。
 
-
+> 以上原理解析文章来源：https://juejin.im/post/5add46606fb9a07abf721d1d
 
 
 
