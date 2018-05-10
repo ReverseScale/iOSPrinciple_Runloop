@@ -2,7 +2,7 @@
 Principle Runloop
 
 ### 一. RunLoop简介
-运行循环，在程序运行过程中循环做一些事情，如果没有Runloop程序执行完毕就会立即退出，如果有Runloop程序会一直运行，并且时时刻刻在等待用户的输入操作。RunLoop可以在需要的时候自己跑起来运行，在没有操作的时候就停下来休息。充分节省CPU资源，提高程序性能。
+运行循环，在程序运行过程中循环做一些事情，如果没有Runloop程序执行完毕就会立即退出，如果有Runloop程序会一直运行，并且时时刻刻在等待用户的输入操作。RunLoop可以在需要的时候自己跑起来运行，在没有操作的时候就停下来休息。能够充分节省CPU资源，提高程序性能。
 
 ### 二. RunLoop基本作用
 * 1.保持程序持续运行，程序一启动就会开一个主线程，主线程一开起来就会跑一个主线程对应的RunLoop,RunLoop保证主线程不会被销毁，也就保证了程序的持续运行
@@ -145,7 +145,13 @@ CF_EXPORT CFRunLoopRef _CFRunLoopGet0(pthread_t t) {
 }
 ```
 
-从上面的代码可以看出，线程和 RunLoop 之间是一一对应的，其关系是保存在一个 Dictionary 里。所以我们创建子线程RunLoop时，只需在子线程中获取当前线程的RunLoop对象即可[NSRunLoop currentRunLoop];如果不获取，那子线程就不会创建与之相关联的RunLoop，并且只能在一个线程的内部获取其 RunLoop
+从上面的代码可以看出，线程和 RunLoop 之间是一一对应的，其关系是保存在一个 Dictionary 里。所以我们创建子线程RunLoop时，只需在子线程中获取当前线程的RunLoop对象即可
+
+```objc
+[NSRunLoop currentRunLoop];
+```
+
+如果不获取，那子线程就不会创建与之相关联的RunLoop，并且只能在一个线程的内部获取其 RunLoop
 [NSRunLoop currentRunLoop];方法调用时，会先看一下字典里有没有存子线程相对用的RunLoop，如果有则直接返回RunLoop，如果没有则会创建一个，并将与之对应的子线程存入字典中。当线程结束时，RunLoop会被销毁。
 
 ### 六. RunLoop结构体
@@ -353,6 +359,7 @@ RunLoop 有五种运行模式，其中常见的有1.2两种
     dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
     // 需要对timer进行强引用，保证其不会被释放掉，才会按时调用block块
     // 局部变量，让指针强引用
+    
     self.timer = timer;
     //2.设置定时器的开始时间,间隔时间,精准度
     /*
@@ -395,7 +402,7 @@ CFRunLoopObserverRef是观察者，能够监听RunLoop的状态改变
     第二个参数 CFOptionFlags activities：要监听的状态 kCFRunLoopAllActivities 监听所有状态
     第三个参数 Boolean repeats：YES:持续监听 NO:不持续
     第四个参数 CFIndex order：优先级，一般填0即可
-    第五个参数 ：回调 两个参数observer:监听者 activity:监听的事件
+    第五个参数 回调 两个参数observer:监听者 activity:监听的事件
     */
     /*
     所有事件
@@ -479,8 +486,7 @@ void CFRunLoopRun(void) {    /* DOES CALLOUT */
 SInt32 CFRunLoopRunSpecific(CFRunLoopRef rl, CFStringRef modeName, CFTimeInterval seconds, Boolean returnAfterSourceHandled) {     /* DOES CALLOUT */
 
     // 通知Observers : 进入Loop
-    // __CFRunLoopDoObservers内部会调用 __CFRUNLOOP_IS_CALLING_OUT_TO_AN_OBSERVER_CALLBACK_FUNCTION__
-    函数
+    // __CFRunLoopDoObservers内部会调用 __CFRUNLOOP_IS_CALLING_OUT_TO_AN_OBSERVER_CALLBACK_FUNCTION__函数
     if (currentMode->_observerMask & kCFRunLoopEntry ) __CFRunLoopDoObservers(rl, currentMode, kCFRunLoopEntry);
 
     // 核心的Loop逻辑
@@ -492,7 +498,7 @@ SInt32 CFRunLoopRunSpecific(CFRunLoopRef rl, CFStringRef modeName, CFTimeInterva
     return result;
 }
 
-    // 精简后的 __CFRunLoopRun函数，保留了主要代码
+// 精简后的 __CFRunLoopRun函数，保留了主要代码
 static int32_t __CFRunLoopRun(CFRunLoopRef rl, CFRunLoopModeRef rlm, CFTimeInterval seconds, Boolean stopAfterHandle, CFRunLoopModeRef previousMode) {
     int32_t retVal = 0;
     do {
@@ -603,7 +609,7 @@ __CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE1_PERFORM_FUNCTION__
 [NSRunLoop currentRunLoop]runUntilDate:<#(nonnull NSDate *)#>
 [NSRunLoop currentRunLoop]runMode:<#(nonnull NSString *)#> beforeDate:<#(nonnull NSDate *)#>
 ```
-
+### 十. RunLoop 使用场景
 #### 1. 常驻线程
 
 常驻线程的作用：我们知道，当子线程中的任务执行完毕之后就被销毁了，那么如果我们需要开启一个子线程，在程序运行过程中永远都存在，那么我们就会面临一个问题，如何让子线程永远活着，这时就要用到常驻线程：给子线程开启一个RunLoop 
