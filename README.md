@@ -793,7 +793,7 @@ UIImage *downloadedImage = ...;
      afterDelay:0
      inModes:@[NSDefaultRunLoopMode]];
 ```
-10.3 接到程序崩溃时的信号进行自主处理例如弹出提示等
+#### 5.接到程序崩溃时的信号进行自主处理例如弹出提示等
 ```objc
 CFRunLoopRef runLoop = CFRunLoopGetCurrent();
 NSArray *allModes = CFBridgingRelease(CFRunLoopCopyAllModes(runLoop));
@@ -803,7 +803,7 @@ while (1) {
      }
 }
 ```
-#### 5.异步测试
+#### 6.异步测试
 ```objc
 - (BOOL)runUntilBlock:(BOOL(^)())block timeout:(NSTimeInterval)timeout
 {
