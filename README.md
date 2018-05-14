@@ -609,8 +609,71 @@ __CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE1_PERFORM_FUNCTION__
 [NSRunLoop currentRunLoop]runUntilDate:<#(nonnull NSDate *)#>
 [NSRunLoop currentRunLoop]runMode:<#(nonnull NSString *)#> beforeDate:<#(nonnull NSDate *)#>
 ```
+
+### 相关问题
+一些有关Runloop的问题
+
+#### 基于NSTimer的轮播器什么情况下会被页面滚动暂停，怎样可以不被暂停，为什么？
+
+NSTimer不管用是因为Mode的切换，因为如果我们在主线程使用定时器，此时RunLoop的Mode为kCFRunLoopDefaultMode，即定时器属于kCFRunLoopDefaultMode，那么此时我们滑动ScrollView时，RunLoop的Mode会切换到UITrackingRunLoopMode，因此在主线程的定时器就不在管用了，调用的方法也就不再执行了，当我们停止滑动时，RunLoop的Mode切换回kCFRunLoopDefaultMode，所有NSTimer就又管用了。若想定时器继续执行，需要将NSTimer 注册为 kCFRunLoopCommonModes 。
+
+#### 延迟执行performSelecter相关方法是怎样被执行的？在子线程中也是一样的吗？
+当调用 NSObject 的 performSelecter:afterDelay: 后，实际上其内部会创建一个 Timer 并添加到当前线程的 RunLoop 中。所以如果当前线程没有 RunLoop，则这个方法会失效。
+
+当调用 performSelector:onThread: 时，实际上其会创建一个 Timer 加到对应的线程去，同样的，如果对应线程没有 RunLoop 该方法也会失效。
+
+#### 事件响应和手势识别底层处理是一致的吗，为什么？
+
+事件响应：
+
+苹果注册了一个 Source1 (基于 mach port 的) 用来接收系统事件，其回调函数为 _IOHIDEventSystemClientQueueCallback()。
+当一个硬件事件(触摸/锁屏/摇晃等)发生后，首先由 IOKit.framework 生成一个 IOHIDEvent 事件并由 SpringBoard 接收。SpringBoard 只接收按键(锁屏/静音等)，触摸，加速，接近传感器等几种 Event，随后用 mach port 转发给需要的App进程。随后苹果注册的那个 Source1 就会触发回调，并调用 _UIApplicationHandleEventQueue() 进行应用内部的分发。
+
+_UIApplicationHandleEventQueue() 会把 IOHIDEvent 处理并包装成 UIEvent 进行处理或分发，其中包括识别 UIGesture/处理屏幕旋转/发送给 UIWindow 等。通常事件比如 UIButton 点击、touchesBegin/Move/End/Cancel 事件都是在这个回调中完成的。
+
+手势识别：
+
+当上面的 _UIApplicationHandleEventQueue() 识别了一个手势时，其首先会调用 Cancel 将当前的 touchesBegin/Move/End 系列回调打断。随后系统将对应的 UIGestureRecognizer 标记为待处理。
+
+苹果注册了一个 Observer 监测 BeforeWaiting (Loop即将进入休眠) 事件，这个Observer的回调函数是 _UIGestureRecognizerUpdateObserver()，其内部会获取所有刚被标记为待处理的 GestureRecognizer，并执行GestureRecognizer的回调。
+
+当有 UIGestureRecognizer 的变化(创建/销毁/状态改变)时，这个回调都会进行相应处理。
+
+#### 界面刷新时，是在什么时候会真正执行刷新，为什么会刷新不及时？
+当在操作 UI 时，比如改变了 Frame、更新了 UIView/CALayer 的层次时，或者手动调用了 UIView/CALayer 的 setNeedsLayout/setNeedsDisplay方法后，这个 UIView/CALayer 就被标记为待处理，并被提交到一个全局的容器去。
+
+苹果注册了一个 Observer 监听 BeforeWaiting(即将进入休眠) 和 Exit (即将退出Loop) 事件，回调去执行一个很长的函数：
+
+_ZN2CA11Transaction17observer_callbackEP19__CFRunLoopObservermPv()。这个函数里会遍历所有待处理的 UIView/CAlayer 以执行实际的绘制和调整，并更新 UI 界面。所以说界面刷新并不一定是在setNeedsLayout相关的代码执行后立刻进行的。
+
+#### 项目程序运行中，总是伴随着多次自动释放池的创建和销毁，这些是在什么时候发生的呢？
+
+系统就是通过@autoreleasepool {}这种方式来为我们创建自动释放池的，一个线程对应一个runloop，系统会为每一个runloop隐式的创建一个自动释放池，所有的autoreleasePool构成一个栈式结构，在每个runloop结束时，当前栈顶的autoreleasePool会被销毁，而且会对其中的每一个对象做一次release（严格来说，是你对这个对象做了几次autorelease就会做几次release，不一定是一次)，特别指出，使用容器的block版本的枚举器的时候，系统会自动添加一个autoreleasePool
+
+```objc
+[array enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) { 
+// 这里被一个局部@autoreleasepool包围着 
+}];
+```
+
+#### 当我们在子线程上需要执行代理方法或者回调时，怎么确保当前线程没有被销毁？
+首先引入一个概念：Event_loop，一般一个线程执行完任务后就会退出，当需要保证该线程不退出，可以通过类似以下方式：
+
+```objc
+function do_loop() {
+    initialize();
+    do {
+        var message = get_next_message();
+        process_message(message);
+    } while (message != quit);
+}
+```
+
+开启一个循环，保证线程不退出，这就是Event_loop模型。这是在很多操作系统中都使用的模型，例如OS/iOS中的RunLoop。这种模型最大的作用就是管理事件/消息，在有新消息到来时立刻唤醒处理，没有待处理消息时线程休眠，避免资源浪费。
+
+
 ### 十. RunLoop 使用场景
-#### 1. 常驻线程
+#### 1.常驻线程
 
 常驻线程的作用：我们知道，当子线程中的任务执行完毕之后就被销毁了，那么如果我们需要开启一个子线程，在程序运行过程中永远都存在，那么我们就会面临一个问题，如何让子线程永远活着，这时就要用到常驻线程：给子线程开启一个RunLoop 
 
@@ -676,7 +739,7 @@ __CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE1_PERFORM_FUNCTION__
 ```
 注意：创建子线程相关的RunLoop，在子线程中创建即可，并且RunLoop中要至少有一个Timer 或 一个Source 保证RunLoop不会因为空转而退出，因此在创建的时候直接加入，如果没有加入Timer或者Source，或者只加入一个监听者，运行程序会崩溃
 
-#### 2. 自动释放池
+#### 2.自动释放池
 Timer和Source也是一些变量，需要占用一部分存储空间，所以要释放掉，如果不释放掉，就会一直积累，占用的内存也就越来越大，这显然不是我们想要的。
 
 *那么什么时候释放，怎么释放呢？*
@@ -688,6 +751,81 @@ RunLoop内部有一个自动释放池，当RunLoop开启时，就会自动创建
 ```objc
 @autorelease{  
     // 执行代码 
+}
+```
+
+#### 3.AFNetworking
+使用NSOperation+NSURLConnection并发模型都会面临NSURLConnection下载完成前线程退出导致NSOperation对象接收不到回调的问题。AFNetWorking解决这个问题的方法是按照官方的guid NSURLConnection 上写的NSURLConnection的delegate方法需要在connection发起的线程runloop中调用，于是AFNetWorking直接借鉴了Apple自己的一个Demo的实现方法单独起一个global thread，内置一个runloop，所有的connection都由这个runloop发起，回调也是它接收，不占用主线程，也不耗CPU资源。
+
+```objc
++ (void)networkRequestThreadEntryPoint:(id)__unused object {
+     @autoreleasepool {
+          [[NSThread currentThread] setName:@"AFNetworking"];
+          NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+          [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
+          [runLoop run];
+     }
+}
+
++ (NSThread *)networkRequestThread {
+     static NSThread *_networkRequestThread = nil;
+     static dispatch_once_t oncePredicate;
+     dispatch_once(&oncePredicate, ^{
+          _networkRequestThread =
+          [[NSThread alloc] initWithTarget:self
+               selector:@selector(networkRequestThreadEntryPoint:)
+               object:nil];
+          [_networkRequestThread start];
+     });
+
+     return _networkRequestThread;
+}
+```
+类似的可以用这个方法创建一个常驻服务的线程。
+
+#### 4.TableView中实现平滑滚动延迟加载图片
+
+利用CFRunLoopMode的特性，可以将图片的加载放到NSDefaultRunLoopMode的mode里，这样在滚动UITrackingRunLoopMode这个mode时不会被加载而影响到。
+```objc
+UIImage *downloadedImage = ...;
+[self.imageView performSelector:@selector(setImage:)
+     withObject:downloadedImage
+     afterDelay:0
+     inModes:@[NSDefaultRunLoopMode]];
+```
+10.3 接到程序崩溃时的信号进行自主处理例如弹出提示等
+```objc
+CFRunLoopRef runLoop = CFRunLoopGetCurrent();
+NSArray *allModes = CFBridgingRelease(CFRunLoopCopyAllModes(runLoop));
+while (1) {
+     for (NSString *mode in allModes) {
+          CFRunLoopRunInMode((CFStringRef)mode, 0.001, false);
+     }
+}
+```
+#### 5.异步测试
+```objc
+- (BOOL)runUntilBlock:(BOOL(^)())block timeout:(NSTimeInterval)timeout
+{
+     __block Boolean fulfilled = NO;
+     void (^beforeWaiting) (CFRunLoopObserverRef observer, CFRunLoopActivity activity) =
+     ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
+          fulfilled = block();
+          if (fulfilled) {
+               CFRunLoopStop(CFRunLoopGetCurrent());
+          }
+     };
+
+     CFRunLoopObserverRef observer = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeWaiting, true, 0, beforeWaiting);
+     CFRunLoopAddObserver(CFRunLoopGetCurrent(), observer, kCFRunLoopDefaultMode);
+
+     // Run!
+     CFRunLoopRunInMode(kCFRunLoopDefaultMode, timeout, false);
+
+     CFRunLoopRemoveObserver(CFRunLoopGetCurrent(), observer, kCFRunLoopDefaultMode);
+     CFRelease(observer);
+
+     return fulfilled;
 }
 ```
 
