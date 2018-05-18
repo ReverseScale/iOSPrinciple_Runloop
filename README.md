@@ -254,7 +254,7 @@ dispatch_async(dispatch_get_global_queue(0, 0), ^{
 
 其实，当我们触发了事件（触摸/锁屏/摇晃等）后，由IOKit.framework生成一个 IOHIDEvent事件
 
-> IOKit是苹果的硬件驱动框架，由它进行底层接口的抽象封装与系统进行交互传递硬件感应的事件，并专门处理用户交互设备，由IOHIDServices和IOHIDDisplays两部分组成，其中IOHIDServices是专门处理用户交互的，它会将事件封装成IOHIDEvents对象，
+> IOKit是苹果的硬件驱动框架，由它进行底层接口的抽象封装与系统进行交互传递硬件感应的事件，并专门处理用户交互设备，由IOHIDServices和IOHIDDisplays两部分组成，其中IOHIDServices是专门处理用户交互的，它会将事件封装成IOHIDEvents对象
 
 接着用mach port转发给需要的App进程，随后 Source1就会接收IOHIDEvent，之后再回调__IOHIDEventSystemClientQueueCallback()，__IOHIDEventSystemClientQueueCallback()内触发Source0，Source0 再触发 _UIApplicationHandleEventQueue()。所以触摸事件看到是在 Source0 内的。
 
